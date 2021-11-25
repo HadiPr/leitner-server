@@ -8,7 +8,7 @@ function getDefinition(word) {
 
 function connectDb(callback = () => { }) {
      const db_url = process.env.NODE_ENV !== 'production' ? 'mongodb://localhost:27017/dict' 
-     : `mongodb+srv://${node.env.MONGO_USERNAME}:${node.env.MONGO_PASSWORD}@cluster0.baiai.mongodb.net/lef?retryWrites=true&w=majority`
+     : `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.baiai.mongodb.net/lef?retryWrites=true&w=majority`
      mongoose.connect(db_url)
           .then(() => {
                console.log('mongo is successfully connected...')
