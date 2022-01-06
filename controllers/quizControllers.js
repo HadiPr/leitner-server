@@ -29,8 +29,8 @@ router.patch('/answer/:id', (req, res, next) => {
           word.updatedDate = new Date().toISOString().slice(0, 10)
           return word.save()
      })
-          .then(() => {
-               res.json({ success: true })
+          .then((r) => {
+               res.json({data: { success: true , _id: r._id}})
           })
           .catch(err => next(err))
 })

@@ -2,12 +2,17 @@ const router = require('express').Router()
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const checkAuth = require('../middlewares/auth')
+const { errorMaker } = require('../helpers.js')
 
 router.post('/signup', async (req, res, next) => {
-     const {username, password} = req.body
+     const { username, password, confirmPass, ...others } = req.body || {}
+     if(!Object.keys(others))
+          res.status(422).json({hasError: true})
      try {
           const user = await User.findOne({username})
-          if(user) return next(new Error('کاربری با این مشخصات موجود است'))
+          if(user){
+               return next(errorMaker('This username already exist!', 409))
+          } 
      } catch (err) {
           return next(err)
      }
@@ -15,7 +20,8 @@ router.post('/signup', async (req, res, next) => {
      user.save().then(()=> res.json({success: true}))
  })
 router.post('/login', (req, res, next) => {
-     const {username, password} = req.body
+     let {username, password} = req.body || {}
+     username = username.trim()
      User.findOne({username}).then(user => {
           if(!user){
                res.status(404).json({errorMessage: 'user not found'})
