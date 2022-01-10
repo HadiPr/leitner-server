@@ -5,9 +5,12 @@ const checkAuth = require('../middlewares/auth')
 const { errorMaker } = require('../helpers.js')
 
 router.post('/signup', async (req, res, next) => {
-     const { username, password, confirmPass, ...others } = req.body || {}
-     if(!Object.keys(others))
+     const { username, password, confirm_password, ...others } = req.body || {}
+     if (!Object.keys(others))
           res.status(422).json({hasError: true})
+     if(password !== confirm_password){
+          res.status(422).json({hasError: true, errorMessage: 'Password dosnn\'t match confirm password'})
+     }
      try {
           const user = await User.findOne({username})
           if(user){
@@ -17,7 +20,7 @@ router.post('/signup', async (req, res, next) => {
           return next(err)
      }
      const user = new User({username, password})
-     user.save().then(()=> res.json({success: true}))
+     user.save().then((user) => res.json({ success: true, data: { user } }))
  })
 router.post('/login', (req, res, next) => {
      let {username, password} = req.body || {}
@@ -35,7 +38,7 @@ router.post('/login', (req, res, next) => {
      })
  })
 router.post('/check', checkAuth, (req, res, next) => {
-     res.json({success: true})
+     res.json({data: {success: true}})
 })
 
 module.exports = router

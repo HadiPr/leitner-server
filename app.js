@@ -8,7 +8,7 @@ const { connectDb } = require('./helpers.js')
 const wordRoutes = require('./controllers/wordControllers')
 const quizRoutes = require('./controllers/quizControllers')
 const userRoutes = require('./controllers/userController')
-
+const settingRoutes = require('./controllers/settingController')
 app.use(cors({
   "origin": "*",
   "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -29,6 +29,7 @@ app.use((req, res, next) => {
 const router = express.Router()
 router.use('/word',authMiddleware, wordRoutes)
 router.use('/quiz',authMiddleware, quizRoutes)
+router.use('/setting', authMiddleware, settingRoutes)
 router.use('/auth', userRoutes)
 
 app.use('/api', router)
