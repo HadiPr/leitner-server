@@ -6,10 +6,11 @@ const { errorMaker } = require('../helpers.js')
 
 router.post('/signup', async (req, res, next) => {
      const { username, password, confirm_password, ...others } = req.body || {}
+     console.log(password , confirm_password)
      if (!Object.keys(others))
-          res.status(422).json({hasError: true})
+          return res.status(422).json({hasError: true})
      if(password !== confirm_password){
-          res.status(422).json({hasError: true, errorMessage: 'Password dosnn\'t match confirm password'})
+          return res.status(422).json({hasError: true, errorMessage: 'Password dosnn\'t match confirm password'})
      }
      try {
           const user = await User.findOne({username})
@@ -31,7 +32,7 @@ router.post('/login', (req, res, next) => {
           }
           if(password === user.password){
                const token = jwt.sign({_id: user._id}, 'hadisupersecretkey', {expiresIn: 60 * 60 * 24 * 7})
-               res.json({data: {token}})
+               res.json({data: {token, success: true}})
           } else {
                return next(new Error('user not found'));
           }

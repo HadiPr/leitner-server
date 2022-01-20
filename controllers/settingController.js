@@ -2,8 +2,7 @@ const router = require('express').Router()
 const User = require('../models/user')
 router.get('/', async (req, res, next) => {
      try {
-          const { setting, ...others} = await User.findById(req.user_id).select('-setting._id -setting.time_to_remind')
-          console.log(setting)
+          const { setting } = await User.findById(req.user_id).select('-setting._id -setting.time_to_remind')
           res.json({data: setting})
      } catch (error) {
           next(error)

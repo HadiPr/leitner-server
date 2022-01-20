@@ -6,7 +6,8 @@ const wordSchema = new Schema({
      countOfRightAnswers: {type: Number, default: 0},
      countOfWrongAnswers: {type: Number, default: 0},
      createdDate: {type: Number, default: Date.now()},
-     updatedDate: String,
+     updated_date: {type: String, default: `${new Date().toISOString().slice(0,10)}`},
+     daily_updates: {type: Number, default: 0},
      user_id: Types.ObjectId,
 })
 
