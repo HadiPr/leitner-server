@@ -7,7 +7,7 @@ const router = require('express').Router()
 router.get('/', async (req, res, next) => {
      const { user_id } = req
      try {
-          let [{ setting }, quiz] = await Promise.all([
+          let [{ setting=null }, quiz] = await Promise.all([
                User.findById(user_id),
                Quiz.find({ user_id, date: req.query.date }).populate('words.word', 'word definition'),
           ])
@@ -23,6 +23,9 @@ router.get('/', async (req, res, next) => {
                     user_id: req.user_id,
                     countOfRightAnswers: { $lte: maxTrueAnswers },
                }, 'word definition').sort('-countOfWrongAnswers createdDate')
+               if(!quizWords.length){
+                    return res.json({message: 'You Have No Word To Make A Quiz!'})
+               }
                let newQuiz = new Quiz({
                     user_id,
                     date: today,
@@ -59,47 +62,24 @@ router.patch('/answer', async (req, res, next) => {
                break;
      }
      const [quiz, word] = await Promise.all([
-          Quiz.findOne({ $and: [{ _id: quiz_id }, {'words.word': {$elemMatch: [word_id]}}] }),
-          // Quiz.findOne({ $and: [{ _id: quiz_id }, {'words.word': word_id}] }),
+          Quiz.findOne({ $and: [{ _id: quiz_id }, { 'words.word': word_id }] }),
           Word.findOne({ user_id: req.user_id, _id: word_id }),
      ])
-     // quiz.words[0] = { ...quiz.words[0], is_answered: true }
-     console.log('=>', quiz)
-     // => {
-     //      _id: new ObjectId("61ec38e8aa15a208403055e5"),
-     //      user_id: new ObjectId("61dc525d0f4044d2dd604947"),
-     //      date: 2022-01-22T00:00:00.000Z,
-     //      is_done: false,
-     //      words: [
-     //        {
-     //          word: new ObjectId("61ddadc34adb428db22cfeee"),
-     //          is_answered: false,
-     //          _id: new ObjectId("61ec38e8aa15a208403055e6")
-     //        },
-     //        {
-     //          word: new ObjectId("61ddad374adb428db22cfe81"),
-     //          is_answered: false,
-     //          _id: new ObjectId("61ec38e8aa15a208403055e7")
-     //        }
-     //      ],
-     //      __v: 0
-     //    }
-     // word[nameOfKey] += 1
-     // word.updated_date = `${new Date().toISOString().slice(0, 10)}`
-
-     try {
-          // const [, savedWord] = await Promise.all([
-          //      quiz.save(),
-          //      word.save(),
-          // ])
-          // res.json({ data: { success: true, _id: savedWord._id } })
-     } catch (error) {
-          console.log('=>', error.message)
+     const targetWord = quiz.words.find(({ word }) => word == word_id)
+     targetWord.is_answered = true;
+     word[nameOfKey]++
+     if(quiz.words.map(word => word.is_answered).every(bool => bool)){
+          quiz.is_done = true
      }
-     // .then((r) => {
-     //      console.log('=>', r)
-     // })
-     // .catch(err => next(err))
+     try {
+          const [, savedWord] = await Promise.all([
+               quiz.save(),
+               word.save(),
+          ])
+          res.json({ data: { success: true, _id: savedWord._id } })
+     } catch (error) {
+          next(err)
+     }
 })
 
 
